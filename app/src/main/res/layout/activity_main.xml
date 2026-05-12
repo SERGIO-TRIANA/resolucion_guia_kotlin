@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_main.xml -->
+<!-- Pantalla principal con lista de transacciones -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/gris_claro">
+
+    <!-- ===== TARJETA DE BALANCE (parte superior fija) ===== -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/verde_primario">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Balance total"
+                android:textSize="14sp"
+                android:textColor="#B9F6CA" />
+
+            <TextView
+                android:id="@+id/tvBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$ 0"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/blanco"
+                android:layout_marginTop="4dp" />
+
+            <!-- Fila de ingresos y gastos -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▲ Ingresos"
+                        android:textSize="12sp"
+                        android:textColor="#B9F6CA" />
+
+                    <TextView
+                        android:id="@+id/tvIngresos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$ 0"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/blanco" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▼ Gastos"
+                        android:textSize="12sp"
+                        android:textColor="#FFCDD2" />
+
+                    <TextView
+                        android:id="@+id/tvGastos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$ 0"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/blanco" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ===== ENCABEZADO DE TRANSACCIONES ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Transacciones"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/negro_texto" />
+
+        <TextView
+            android:id="@+id/tvNumTransacciones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/gris_texto" />
+    </LinearLayout>
+
+    <!-- ===== LISTA DE TRANSACCIONES ===== -->
+    <!-- RecyclerView muestra la lista de forma eficiente -->
+    <!-- layout_weight="1" hace que ocupe todo el espacio restante -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTransacciones"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp" />
+    <!-- clipToPadding="false" permite que el contenido se vea debajo del padding -->
+    <!-- paddingBottom="80dp" deja espacio para el botón flotante -->
+
+    <!-- ===== BOTÓN AGREGAR ===== -->
+    <Button
+        android:id="@+id/btnAgregar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+ Agregar transacción"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/verde_primario"
+        android:textColor="@color/blanco"
+        android:padding="12dp" />
+
+</LinearLayout>

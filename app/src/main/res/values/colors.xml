@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- colors.xml -->
+<!-- Definimos los colores de la app en un solo lugar -->
+<!-- Así si queremos cambiar un color, lo hacemos aquí y se actualiza en toda la app -->
+<resources>
+    <!-- Colores principales de MisFinanzas -->
+    <color name="verde_primario">#1B5E20</color>    <!-- verde oscuro para el tema -->
+    <color name="verde_claro">#4CAF50</color>        <!-- verde claro para ingresos -->
+    <color name="rojo_gasto">#C62828</color>          <!-- rojo para gastos -->
+    <color name="gris_texto">#666666</color>          <!-- gris para texto secundario -->
+    <color name="gris_claro">#F5F5F5</color>          <!-- gris claro para fondos -->
+    <color name="blanco">#FFFFFF</color>               <!-- blanco -->
+    <color name="negro_texto">#212121</color>          <!-- negro para texto principal -->
+</resources>

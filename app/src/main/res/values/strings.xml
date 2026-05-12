@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- strings.xml -->
+<!-- Todos los textos de la app van aquí -->
+<!-- Esto facilita traducir la app a otros idiomas en el futuro -->
+<resources>
+    <string name="app_name">MisFinanzas</string>
+    <string name="titulo_balance">Balance</string>
+    <string name="titulo_ingresos">Ingresos</string>
+    <string name="titulo_gastos">Gastos</string>
+    <string name="sin_transacciones">No hay transacciones</string>
+    <string name="formato_transacciones">%d transacciones</string>
+    <string name="misfinanzas">MisFinanzas</string>
+</resources>

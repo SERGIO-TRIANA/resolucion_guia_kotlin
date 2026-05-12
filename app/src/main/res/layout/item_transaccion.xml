@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_transaccion.xml -->
+<!-- Este layout define cómo se ve CADA elemento de la lista de transacciones -->
+<!-- Se repite una vez por cada transacción en la lista -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+    <!-- layout_marginHorizontal = margen izquierdo y derecho -->
+    <!-- layout_marginVertical = margen arriba y abajo -->
+
+    <!-- Fila horizontal: emoji | nombre+categoría | monto -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Emoji de la categoría dentro de un fondo circular -->
+        <TextView
+            android:id="@+id/tvEmoji"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:textSize="22sp"
+            android:background="@color/gris_claro" />
+        <!-- gravity="center" centra el emoji dentro del cuadro de 44x44 -->
+
+        <!-- Columna central: descripción y categoría -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <!-- Nombre/descripción de la transacción -->
+            <TextView
+                android:id="@+id/tvDescripcion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/negro_texto"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <!-- maxLines="1" = máximo una línea de texto -->
+            <!-- ellipsize="end" = si no cabe, muestra "..." al final -->
+
+            <!-- Nombre de la categoría -->
+            <TextView
+                android:id="@+id/tvCategoria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/gris_texto"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Monto alineado a la derecha -->
+        <TextView
+            android:id="@+id/tvMonto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <!-- El color del monto se establece desde Kotlin (verde o rojo) -->
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

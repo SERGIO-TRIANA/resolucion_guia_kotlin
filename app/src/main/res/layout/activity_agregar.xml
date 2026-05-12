@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_agregar.xml -->
+<!-- Pantalla para agregar una nueva transacción -->
+<!-- ScrollView por si el teclado empuja el contenido -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Título de la pantalla -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nueva transacción"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/verde_primario" />
+
+        <!-- ===== CAMPO: DESCRIPCIÓN ===== -->
+        <!-- TextInputLayout es la versión Material Design del EditText -->
+        <!-- Muestra el hint como label flotante y soporta mensajes de error -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descripción"
+            android:layout_marginTop="24dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <!-- OutlinedBox = estilo con borde rectangular -->
+
+            <!-- TextInputEditText va DENTRO del TextInputLayout -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1" />
+            <!-- inputType="text" = teclado normal de texto -->
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ===== CAMPO: MONTO ===== -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilMonto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Monto"
+            android:layout_marginTop="16dp"
+            app:prefixText="$ "
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <!-- prefixText muestra "$ " antes del texto que escribe el usuario -->
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMonto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:maxLines="1" />
+            <!-- inputType="numberDecimal" = teclado numérico con punto decimal -->
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ===== TIPO: INGRESO O GASTO ===== -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/negro_texto" />
+
+        <!-- RadioGroup agrupa RadioButtons para que solo uno esté seleccionado -->
+        <RadioGroup
+            android:id="@+id/rgTipo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <!-- RadioButton: opción seleccionable (solo una a la vez dentro del grupo) -->
+            <RadioButton
+                android:id="@+id/rbGasto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Gasto"
+                android:checked="true" />
+            <!-- checked="true" = esta opción está seleccionada por defecto -->
+
+            <RadioButton
+                android:id="@+id/rbIngreso"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Ingreso" />
+        </RadioGroup>
+
+        <!-- ===== CATEGORÍA ===== -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Categoría"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/negro_texto" />
+
+        <!-- Spinner es un dropdown (menú desplegable) -->
+        <!-- Lo configuraremos desde Kotlin con las categorías del enum -->
+        <Spinner
+            android:id="@+id/spCategoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="12dp" />
+
+        <!-- ===== BOTONES ===== -->
+        <!-- Botón de guardar -->
+        <Button
+            android:id="@+id/btnGuardar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar transacción"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/verde_primario"
+            android:textColor="@color/blanco"
+            android:padding="12dp" />
+
+        <!-- Botón de cancelar (estilo texto, sin fondo) -->
+        <Button
+            android:id="@+id/btnCancelar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancelar"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton" />
+        <!-- TextButton = botón sin fondo, solo texto -->
+
+    </LinearLayout>
+</ScrollView>
