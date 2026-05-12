@@ -44,4 +44,14 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+        // ... las que ya tienen
+
+        // ViewModel: componente que sobrevive a rotaciones de pantalla
+        implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+        // LiveData: datos observables que notifican cambios a la UI
+        implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+        // Activity KTX: extensiones para usar viewModels() de forma simple
+        implementation("androidx.activity:activity-ktx:1.8.2")
+
 }

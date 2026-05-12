@@ -1,5 +1,5 @@
 // MainActivity.kt
-// Pantalla principal con navegación a AgregarActivity
+// Pantalla principal usando ViewModel y LiveData
 package com.example.misfinanzas
 
 import androidx.appcompat.app.AppCompatActivity
@@ -7,40 +7,34 @@ import android.os.Bundle
 import android.content.Intent
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-// ActivityResultContracts permite registrar callbacks para resultados de Activities
 import androidx.activity.result.contract.ActivityResultContracts
+// viewModels() es una extensión que crea o recupera el ViewModel
+import androidx.activity.viewModels
 import com.example.misfinanzas.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    // Lista mutable de transacciones (mutable para poder agregar nuevas)
-    private val transacciones = Transaccion.datosDePrueba().toMutableList()
+
+    // viewModels() crea el ViewModel la primera vez y lo recupera en recreaciones
+    // "by viewModels()" es una delegación: la primera vez que se accede, se crea
+    // En rotaciones de pantalla, devuelve el MISMO ViewModel (no crea uno nuevo)
+    private val viewModel: MainViewModel by viewModels()
+
+    // Adapter como propiedad para poder actualizarlo
     private lateinit var adapter: TransaccionAdapter
 
-    // registerForActivityResult registra un callback que se ejecuta
-    // cuando la Activity lanzada devuelve un resultado
-    // Esto reemplaza al antiguo onActivityResult (que está deprecado)
+    // Callback para recibir el resultado de AgregarActivity
     private val lanzarAgregar = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { resultado ->
-        // Este bloque se ejecuta cuando AgregarActivity termina
-        // resultado.resultCode indica si fue exitoso o cancelado
         if (resultado.resultCode == RESULT_OK) {
-            // Obtener la transacción del Intent de resultado
-            // getSerializableExtra obtiene un objeto Serializable por su clave
-            // "as?" hace un cast seguro (retorna null si el tipo no coincide)
             val nueva = resultado.data?.getSerializableExtra("NUEVA_TRANSACCION") as? Transaccion
             if (nueva != null) {
-                // Agregar la nueva transacción al inicio de la lista
-                transacciones.add(0, nueva)
-                // Notificar al adapter que se insertó un item en la posición 0
-                adapter.notifyItemInserted(0)
-                // Hacer scroll al inicio para ver la nueva transacción
+                // Ahora delegamos al ViewModel en lugar de manejar la lista directamente
+                viewModel.agregarTransaccion(nueva)
+                // El RecyclerView se actualiza automáticamente gracias al observe
                 binding.rvTransacciones.scrollToPosition(0)
-                // Recalcular los totales
-                actualizarBalance()
-                // Mostrar confirmación
                 Toast.makeText(this, "Transacción agregada", Toast.LENGTH_SHORT).show()
             }
         }
@@ -51,21 +45,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Configurar el RecyclerView (sin datos todavía)
         configurarRecyclerView()
-        actualizarBalance()
 
-        // Botón de agregar: abre AgregarActivity
+        // Observar los datos del ViewModel
+        // Cada observe se ejecuta automáticamente cuando el dato cambia
+        observarDatos()
+
+        // Botón de agregar
         binding.btnAgregar.setOnClickListener {
-            // Crear un Intent para abrir AgregarActivity
-            // "this" = contexto actual, AgregarActivity::class.java = destino
             val intent = Intent(this, AgregarActivity::class.java)
-            // Lanzar la Activity y esperar resultado
             lanzarAgregar.launch(intent)
         }
     }
 
     private fun configurarRecyclerView() {
-        adapter = TransaccionAdapter(transacciones) { transaccion ->
+        // Inicialmente con lista vacía, se llenará cuando el observe notifique
+        adapter = TransaccionAdapter(emptyList()) { transaccion ->
             Toast.makeText(
                 this,
                 "${transaccion.descripcion}: ${transaccion.montoFormateado()}",
@@ -76,15 +72,38 @@ class MainActivity : AppCompatActivity() {
         binding.rvTransacciones.adapter = adapter
     }
 
-    private fun actualizarBalance() {
-        val ingresos = transacciones.filter { it.esIngreso() }.sumOf { it.monto }
-        val gastos = transacciones.filter { !it.esIngreso() }.sumOf { Math.abs(it.monto) }
-        val balance = transacciones.sumOf { it.monto }
+    // Suscribirse a los LiveData del ViewModel
+    private fun observarDatos() {
+        // Observar la lista de transacciones
+        // Cada vez que la lista cambia, este bloque se ejecuta
+        viewModel.transacciones.observe(this) { lista ->
+            // Recrear el adapter con la nueva lista
+            adapter = TransaccionAdapter(lista) { transaccion ->
+                Toast.makeText(
+                    this,
+                    "${transaccion.descripcion}: ${transaccion.montoFormateado()}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            binding.rvTransacciones.adapter = adapter
+            // Actualizar el contador
+            binding.tvNumTransacciones.text = "${lista.size}"
+        }
 
-        binding.tvBalance.text = formatearMonto(balance)
-        binding.tvIngresos.text = formatearMonto(ingresos)
-        binding.tvGastos.text = formatearMonto(gastos)
-        binding.tvNumTransacciones.text = "${transacciones.size}"
+        // Observar el balance
+        viewModel.balance.observe(this) { balance ->
+            binding.tvBalance.text = formatearMonto(balance)
+        }
+
+        // Observar los ingresos
+        viewModel.ingresos.observe(this) { ingresos ->
+            binding.tvIngresos.text = formatearMonto(ingresos)
+        }
+
+        // Observar los gastos
+        viewModel.gastos.observe(this) { gastos ->
+            binding.tvGastos.text = formatearMonto(gastos)
+        }
     }
 
     private fun formatearMonto(monto: Double): String {
