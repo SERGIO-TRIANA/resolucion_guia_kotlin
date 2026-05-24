@@ -1,79 +1,76 @@
 // MainViewModel.kt
-// ViewModel que maneja el estado de la pantalla principal
-// Sobrevive a rotaciones de pantalla y cambios de configuración
+// ViewModel que usa Room para persistir las transacciones
 package com.example.misfinanzas
 
-// ViewModel es la clase base para ViewModels
-import androidx.lifecycle.ViewModel
-// LiveData es un contenedor de datos observable
-// MutableLiveData permite modificar el valor, LiveData solo permite observar
+// Application se necesita para obtener el contexto de la app
+import android.app.Application
+// AndroidViewModel recibe Application como parámetro (a diferencia de ViewModel)
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+// viewModelScope proporciona un scope de coroutines ligado al ciclo de vida del ViewModel
+import androidx.lifecycle.viewModelScope
+// launch inicia una coroutine
+import kotlinx.coroutines.launch
 
-// MainViewModel hereda de ViewModel
-// No recibe contexto ni referencia a la Activity (eso causaría memory leaks)
-class MainViewModel : ViewModel() {
+// AndroidViewModel en lugar de ViewModel porque necesitamos el contexto
+// para acceder a la base de datos
+// NUNCA guardar una referencia a una Activity en el ViewModel (causa memory leaks)
+// Application es seguro porque vive tanto como la app
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    // _transacciones es MutableLiveData: se puede modificar desde dentro del ViewModel
-    // Es privado para que la Activity no lo modifique directamente
-    // El guion bajo "_" es una convención para indicar que es la versión mutable privada
-    private val _transacciones = MutableLiveData<List<Transaccion>>()
+    // Obtener el DAO de la base de datos
+    // El DAO es nuestra puerta de entrada a la base de datos
+    private val dao = AppDatabase.obtenerInstancia(application).transaccionDao()
 
-    // transacciones es LiveData (solo lectura): la Activity puede observar pero no modificar
-    // Esta es la versión pública que expone el ViewModel
-    val transacciones: LiveData<List<Transaccion>> = _transacciones
+    // LiveData que viene directamente de Room
+    // Room actualiza estos LiveData automáticamente cuando la tabla cambia
+    // No necesitamos MutableLiveData porque Room se encarga de todo
+    val transacciones: LiveData<List<Transaccion>> = dao.obtenerTodas()
+    val balance: LiveData<Double> = dao.obtenerBalance()
+    val ingresos: LiveData<Double> = dao.obtenerTotalIngresos()
+    val gastos: LiveData<Double> = dao.obtenerTotalGastos()
+    val cantidad: LiveData<Int> = dao.obtenerCantidad()
 
-    // LiveData para el balance calculado
-    private val _balance = MutableLiveData<Double>()
-    val balance: LiveData<Double> = _balance
-
-    // LiveData para los ingresos totales
-    private val _ingresos = MutableLiveData<Double>()
-    val ingresos: LiveData<Double> = _ingresos
-
-    // LiveData para los gastos totales
-    private val _gastos = MutableLiveData<Double>()
-    val gastos: LiveData<Double> = _gastos
-
-    // init se ejecuta cuando se crea el ViewModel (una sola vez)
-    // Cargamos los datos de prueba iniciales
+    // init se ejecuta al crear el ViewModel
     init {
-        // Cargar datos de ejemplo
-        _transacciones.value = Transaccion.datosDePrueba()
-        // Recalcular los totales
-        recalcularTotales()
+        // No cargamos datos aquí porque LiveData de Room necesita un observer activo
+        // para tener un .value. La carga de datos de prueba se hace desde la Activity
+        // cuando observa que la lista está vacía (ver MainActivity.kt)
     }
 
-    // Agrega una nueva transacción al inicio de la lista
-    fun agregarTransaccion(transaccion: Transaccion) {
-        // Obtener la lista actual (o una lista vacía si es null)
-        val listaActual = _transacciones.value?.toMutableList() ?: mutableListOf()
-        // Agregar al inicio (posición 0)
-        listaActual.add(0, transaccion)
-        // Actualizar el LiveData con la nueva lista
-        // Al cambiar .value, todos los observadores son notificados automáticamente
-        _transacciones.value = listaActual
-        // Recalcular totales
-        recalcularTotales()
-    }
-
-    // Elimina una transacción de la lista por su posición
-    fun eliminarTransaccion(posicion: Int) {
-        val listaActual = _transacciones.value?.toMutableList() ?: return
-        // Verificar que la posición sea válida
-        if (posicion in listaActual.indices) {
-            listaActual.removeAt(posicion)
-            _transacciones.value = listaActual
-            recalcularTotales()
+    // Función pública para insertar datos de prueba
+    // Se llama desde la Activity cuando detecta que la lista está vacía
+    fun insertarDatosDePrueba() {
+        viewModelScope.launch {
+            // insertarTodas es una función suspend del DAO
+            // Se ejecuta en segundo plano gracias a la coroutine
+            dao.insertarTodas(Transaccion.datosDePrueba())
         }
     }
 
-    // Recalcula balance, ingresos y gastos a partir de la lista actual
-    private fun recalcularTotales() {
-        val lista = _transacciones.value ?: emptyList()
-        // sumOf aplica una transformación a cada elemento y suma los resultados
-        _ingresos.value = lista.filter { it.esIngreso() }.sumOf { it.monto }
-        _gastos.value = lista.filter { !it.esIngreso() }.sumOf { Math.abs(it.monto) }
-        _balance.value = lista.sumOf { it.monto }
+    // Agrega una nueva transacción a la base de datos
+    fun agregarTransaccion(transaccion: Transaccion) {
+        // launch inicia una coroutine para ejecutar la operación en segundo plano
+        viewModelScope.launch {
+            // insertar es suspend: no bloquea el hilo principal
+            dao.insertar(transaccion)
+            // No necesitamos actualizar LiveData manualmente
+            // Room notifica automáticamente a todos los observadores
+        }
+    }
+
+    // Elimina una transacción de la base de datos
+    fun eliminarTransaccion(transaccion: Transaccion) {
+        viewModelScope.launch {
+            dao.eliminar(transaccion)
+        }
+    }
+
+    // Elimina todas las transacciones
+    fun eliminarTodas() {
+        viewModelScope.launch {
+            dao.eliminarTodas()
+        }
     }
 }

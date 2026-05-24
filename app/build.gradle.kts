@@ -1,10 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
     namespace = "com.example.misfinanzas"
-    compileSdk = 36
+    compileSdk = 35
 
     buildFeatures {
         viewBinding = true
@@ -13,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.example.misfinanzas"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -30,9 +32,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -41,17 +50,20 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // Lifecycle & ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.activity:activity-ktx:1.8.2")
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+    // Fix for "No native library found" error on Windows during Room kapt
+    kapt(libs.sqlite.jdbc)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-        // ... las que ya tienen
-
-        // ViewModel: componente que sobrevive a rotaciones de pantalla
-        implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-        // LiveData: datos observables que notifican cambios a la UI
-        implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-        // Activity KTX: extensiones para usar viewModels() de forma simple
-        implementation("androidx.activity:activity-ktx:1.8.2")
-
 }
