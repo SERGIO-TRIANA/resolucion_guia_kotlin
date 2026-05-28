@@ -11,4 +11,6 @@
     <color name="gris_claro">#F5F5F5</color>          <!-- gris claro para fondos -->
     <color name="blanco">#FFFFFF</color>               <!-- blanco -->
     <color name="negro_texto">#212121</color>          <!-- negro para texto principal -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- fragment_estadisticas.xml -->
+<!-- Fragment que muestra estadísticas por categoría -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gris_claro">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estadísticas"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/negro_texto" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gastos por categoría"
+            android:textSize="14sp"
+            android:textColor="@color/gris_texto"
+            android:layout_marginTop="4dp" />
+
+        <!-- Texto para mostrar las categorías con sus totales -->
+        <!-- Se llena desde Kotlin con los datos calculados -->
+        <TextView
+            android:id="@+id/tvDetalleCategorias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp" />
+
+        <!-- Resumen general -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resumen"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTotalTransacciones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total de transacciones: 0"
+                    android:textSize="14sp"
+                    android:textColor="@color/gris_texto"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tvPromedioGasto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Promedio por gasto: $ 0"
+                    android:textSize="14sp"
+                    android:textColor="@color/gris_texto"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

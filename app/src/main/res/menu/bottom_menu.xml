@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- bottom_menu.xml -->
+<!-- Define los items del BottomNavigationView -->
+<!-- Cada item es una pestaña con ícono y texto -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Pestaña de Inicio (resumen de balance) -->
+    <item
+        android:id="@+id/nav_inicio"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Inicio" />
+    <!-- android:id = identificador para saber cuál pestaña se seleccionó -->
+    <!-- android:icon = ícono que se muestra en la pestaña -->
+    <!-- android:title = texto debajo del ícono -->
+
+    <!-- Pestaña de Transacciones (lista completa) -->
+    <item
+        android:id="@+id/nav_transacciones"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="Movimientos" />
+
+    <!-- Pestaña de Estadísticas -->
+    <item
+        android:id="@+id/nav_estadisticas"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Estadísticas" />
+
+</menu>

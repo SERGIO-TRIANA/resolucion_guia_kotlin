@@ -1,5 +1,5 @@
 // AgregarActivity.kt
-// Pantalla para agregar una nueva transacción (actualizada para Room)
+// Formulario con validación mejorada y limpieza de errores en tiempo real
 package com.example.misfinanzas
 
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.content.Intent
 import android.widget.ArrayAdapter
 import android.widget.Toast
+// doAfterTextChanged simplifica el TextWatcher
+import androidx.core.widget.doAfterTextChanged
 import com.example.misfinanzas.databinding.ActivityAgregarBinding
 
 class AgregarActivity : AppCompatActivity() {
@@ -19,10 +21,11 @@ class AgregarActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         configurarSpinnerCategorias()
+        configurarValidacionEnTiempoReal()
         configurarBotones()
     }
 
-    // Llena el Spinner con las categorías del enum
+    // Llena el Spinner con las categorías
     private fun configurarSpinnerCategorias() {
         val etiquetas = Categoria.values().map { "${it.emoji} ${it.etiqueta}" }
         val adapter = ArrayAdapter(
@@ -34,11 +37,32 @@ class AgregarActivity : AppCompatActivity() {
         binding.spCategoria.adapter = adapter
     }
 
+    // Configura la limpieza de errores mientras el usuario escribe
+    private fun configurarValidacionEnTiempoReal() {
+        // Cuando el usuario escribe en descripción, limpiar el error
+        // doAfterTextChanged es más simple que implementar TextWatcher completo
+        binding.etDescripcion.doAfterTextChanged { texto ->
+            // Si el texto no está vacío, limpiar el error
+            if (!texto.isNullOrBlank()) {
+                binding.tilDescripcion.error = null
+            }
+        }
+
+        // Cuando el usuario escribe en monto, limpiar el error
+        binding.etMonto.doAfterTextChanged { texto ->
+            if (!texto.isNullOrBlank()) {
+                binding.tilMonto.error = null
+            }
+        }
+    }
+
     // Configura las acciones de los botones
     private fun configurarBotones() {
         binding.btnGuardar.setOnClickListener {
-            val transaccion = crearTransaccion()
-            if (transaccion != null) {
+            // Validar todos los campos
+            if (validarFormulario()) {
+                // Si todo es válido, crear la transacción y devolverla
+                val transaccion = crearTransaccion()
                 devolverResultado(transaccion)
             }
         }
@@ -48,48 +72,63 @@ class AgregarActivity : AppCompatActivity() {
         }
     }
 
-    // Valida los campos y crea una Transaccion
-    private fun crearTransaccion(): Transaccion? {
-        val descripcion = binding.etDescripcion.text.toString().trim()
-        val montoTexto = binding.etMonto.text.toString().trim()
+    // Valida todos los campos del formulario
+    // Retorna true si todo es válido, false si hay errores
+    private fun validarFormulario(): Boolean {
+        // Variable que rastrea si todo es válido
+        var esValido = true
 
         // Validar descripción
+        val descripcion = binding.etDescripcion.text.toString().trim()
         if (descripcion.isEmpty()) {
             binding.tilDescripcion.error = "La descripción es obligatoria"
-            return null
+            esValido = false
+        } else if (descripcion.length < 3) {
+            binding.tilDescripcion.error = "Mínimo 3 caracteres"
+            esValido = false
         } else {
             binding.tilDescripcion.error = null
         }
 
         // Validar monto
+        val montoTexto = binding.etMonto.text.toString().trim()
+        val montoNumero = montoTexto.toDoubleOrNull()
         if (montoTexto.isEmpty()) {
             binding.tilMonto.error = "El monto es obligatorio"
-            return null
-        }
-
-        val montoNumero = montoTexto.toDoubleOrNull()
-        if (montoNumero == null || montoNumero <= 0) {
-            binding.tilMonto.error = "Ingresa un monto válido mayor a 0"
-            return null
+            esValido = false
+        } else if (montoNumero == null) {
+            binding.tilMonto.error = "Ingresa un número válido"
+            esValido = false
+        } else if (montoNumero <= 0) {
+            binding.tilMonto.error = "El monto debe ser mayor a 0"
+            esValido = false
+        } else if (montoNumero > 999999999) {
+            binding.tilMonto.error = "El monto es demasiado grande"
+            esValido = false
         } else {
             binding.tilMonto.error = null
         }
 
-        // Determinar signo según tipo
+        // No validamos esValido = false en cada caso porque queremos
+        // mostrar TODOS los errores a la vez, no solo el primero
+        return esValido
+    }
+
+    // Crea la transacción con los datos del formulario
+    // Se llama solo después de que validarFormulario() retorna true
+    private fun crearTransaccion(): Transaccion {
+        val descripcion = binding.etDescripcion.text.toString().trim()
+        val montoNumero = binding.etMonto.text.toString().trim().toDouble()
         val esGasto = binding.rbGasto.isChecked
         val montoFinal = if (esGasto) -montoNumero else montoNumero
-
-        // Obtener la categoría seleccionada
         val categoriaIndex = binding.spCategoria.selectedItemPosition
         val categoria = Categoria.values()[categoriaIndex]
 
-        // Crear la transacción con categoriaNombre (String) para Room
-        // id = 0 para que Room lo genere automáticamente (autoGenerate)
         return Transaccion(
             id = 0,
             monto = montoFinal,
             descripcion = descripcion,
-            categoriaNombre = categoria.name  // .name convierte el enum a String
+            categoriaNombre = categoria.name
         )
     }
 

@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -49,19 +49,24 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.constraintlayout)
 
     // Lifecycle & ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
+    // Fragment KTX: activityViewModels() para compartir ViewModel entre Fragments (Capítulo 10)
+    implementation("androidx.fragment:fragment-ktx:1.7.1")
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
-    // Fix for "No native library found" error on Windows during Room kapt
-    kapt(libs.sqlite.jdbc)
+    // Procesador de Room con KSP (más eficiente en Windows)
+    ksp(libs.androidx.room.compiler)
+    // Driver necesario para que Room genere el código en Windows
+    ksp(libs.sqlite.jdbc)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
