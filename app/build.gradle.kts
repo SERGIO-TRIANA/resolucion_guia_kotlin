@@ -45,6 +45,15 @@ kotlin {
 }
 
 dependencies {
+    // Retrofit: cliente HTTP para consumir APIs
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    // Converter Gson: convierte JSON a objetos Kotlin automáticamente
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // Gson: librería de Google para parsear JSON
+    implementation("com.google.code.gson:gson:2.10.1")
+    // Coroutines Android: para ejecutar llamadas de red en segundo plano
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

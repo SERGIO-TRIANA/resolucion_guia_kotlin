@@ -10,6 +10,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 // viewModelScope proporciona un scope de coroutines ligado al ciclo de vida del ViewModel
 import androidx.lifecycle.viewModelScope
+// Importar clases de la API
+import com.example.misfinanzas.api.RetrofitClient
+import com.example.misfinanzas.api.ResultadoApi
+import com.example.misfinanzas.api.TasaCambioResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.UnknownHostException
+import java.net.SocketTimeoutException
 // launch inicia una coroutine
 import kotlinx.coroutines.launch
 
@@ -31,6 +39,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val ingresos: LiveData<Double> = dao.obtenerTotalIngresos()
     val gastos: LiveData<Double> = dao.obtenerTotalGastos()
     val cantidad: LiveData<Int> = dao.obtenerCantidad()
+
+    // LiveData para el resultado de la consulta de tasas de cambio
+    private val _tasasCambio = MutableLiveData<ResultadoApi<TasaCambioResponse>>()
+    val tasasCambio: LiveData<ResultadoApi<TasaCambioResponse>> = _tasasCambio
+
+    // Consulta las tasas de cambio desde la API
+    fun consultarTasas(monedaBase: String = "USD") {
+        // Indicar que estamos cargando
+        _tasasCambio.value = ResultadoApi.Cargando
+
+        viewModelScope.launch {
+            try {
+                // withContext(Dispatchers.IO) ejecuta el bloque en un hilo de I/O
+                // Las llamadas de red SIEMPRE deben ir en Dispatchers.IO
+                // No en el hilo principal (Main) porque bloquearía la UI
+                val respuesta = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.obtenerTasas(monedaBase)
+                }
+                // Si llegamos aquí, la petición fue exitosa
+                _tasasCambio.value = ResultadoApi.Exito(respuesta)
+
+            } catch (e: UnknownHostException) {
+                // No hay conexión a internet
+                _tasasCambio.value = ResultadoApi.Error("Sin conexión a internet")
+            } catch (e: SocketTimeoutException) {
+                // La petición tardó demasiado
+                _tasasCambio.value = ResultadoApi.Error("Tiempo de espera agotado")
+            } catch (e: Exception) {
+                // Cualquier otro error
+                _tasasCambio.value = ResultadoApi.Error("Error: ${e.message}")
+            }
+        }
+    }
 
     // init se ejecuta al crear el ViewModel
     init {

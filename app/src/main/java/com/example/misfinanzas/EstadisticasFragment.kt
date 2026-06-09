@@ -9,6 +9,7 @@ import android.view.View
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.misfinanzas.api.ResultadoApi
 import com.example.misfinanzas.databinding.FragmentEstadisticasBinding
 
 class EstadisticasFragment : Fragment() {
@@ -32,6 +33,45 @@ class EstadisticasFragment : Fragment() {
         // Observar las transacciones para calcular estadísticas
         viewModel.transacciones.observe(viewLifecycleOwner) { lista ->
             mostrarEstadisticas(lista)
+        }
+
+        // Observar el resultado de la consulta de tasas
+        viewModel.tasasCambio.observe(viewLifecycleOwner) { resultado ->
+            // "when" con sealed class: el compilador verifica que cubramos todos los casos
+            when (resultado) {
+                is ResultadoApi.Cargando -> {
+                    // Mostrar el indicador de carga
+                    binding.progressTasas.visibility = View.VISIBLE
+                    binding.tvTasas.text = ""
+                }
+                is ResultadoApi.Exito -> {
+                    // Ocultar el indicador de carga
+                    binding.progressTasas.visibility = View.GONE
+                    // Mostrar las tasas relevantes
+                    val tasas = resultado.datos.rates
+                    val texto = buildString {
+                        // buildString construye un String de forma eficiente
+                        appendLine("1 USD = ${tasas["COP"] ?: "N/A"} COP")
+                        appendLine("1 USD = ${tasas["EUR"] ?: "N/A"} EUR")
+                        appendLine("1 USD = ${tasas["GBP"] ?: "N/A"} GBP")
+                        appendLine("1 USD = ${tasas["BRL"] ?: "N/A"} BRL")
+                        append("1 USD = ${tasas["MXN"] ?: "N/A"} MXN")
+                    }
+                    binding.tvTasas.text = texto
+                }
+                is ResultadoApi.Error -> {
+                    binding.progressTasas.visibility = View.GONE
+                    binding.tvTasas.text = resultado.mensaje
+                    binding.tvTasas.setTextColor(
+                        requireContext().getColor(R.color.rojo_gasto)
+                    )
+                }
+            }
+        }
+
+        // Botón para consultar tasas
+        binding.btnConsultarTasas.setOnClickListener {
+            viewModel.consultarTasas()
         }
     }
 
