@@ -30,87 +30,100 @@ class EstadisticasFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Observar las transacciones para calcular estadísticas
-        viewModel.transacciones.observe(viewLifecycleOwner) { lista ->
-            mostrarEstadisticas(lista)
-        }
+        with(binding) {
+            // Observar las transacciones para calcular estadísticas
+            viewModel.transacciones.observe(viewLifecycleOwner) { lista ->
+                mostrarEstadisticas(lista)
+            }
 
-        // Observar el resultado de la consulta de tasas
-        viewModel.tasasCambio.observe(viewLifecycleOwner) { resultado ->
-            // "when" con sealed class: el compilador verifica que cubramos todos los casos
-            when (resultado) {
-                is ResultadoApi.Cargando -> {
-                    // Mostrar el indicador de carga
-                    binding.progressTasas.mostrar()
-                    binding.tvTasas.text = ""
-                }
-                is ResultadoApi.Exito -> {
-                    // Ocultar el indicador de carga
-                    binding.progressTasas.ocultar()
-                    // Mostrar las tasas relevantes
-                    val tasas = resultado.datos.rates
-                    val texto = buildString {
-                        // buildString construye un String de forma eficiente
-                        appendLine("1 USD = ${tasas["COP"] ?: "N/A"} COP")
-                        appendLine("1 USD = ${tasas["EUR"] ?: "N/A"} EUR")
-                        appendLine("1 USD = ${tasas["GBP"] ?: "N/A"} GBP")
-                        appendLine("1 USD = ${tasas["BRL"] ?: "N/A"} BRL")
-                        append("1 USD = ${tasas["MXN"] ?: "N/A"} MXN")
+            // Observar el resultado de la consulta de tasas
+            viewModel.tasasCambio.observe(viewLifecycleOwner) { resultado ->
+                when (resultado) {
+                    is ResultadoApi.Cargando -> {
+                        progressTasas.mostrar()
+                        tvTasas.text = ""
                     }
-                    binding.tvTasas.text = texto
-                }
-                is ResultadoApi.Error -> {
-                    binding.progressTasas.ocultar()
-                    binding.tvTasas.text = resultado.mensaje
-                    binding.tvTasas.setTextColor(
-                        requireContext().getColor(R.color.rojo_gasto)
-                    )
+                    is ResultadoApi.Exito -> {
+                        progressTasas.ocultar()
+                        val tasas = resultado.datos.rates
+                        tvTasas.text = buildString {
+                            appendLine("1 USD = ${tasas["COP"] ?: "N/A"} COP")
+                            appendLine("1 USD = ${tasas["EUR"] ?: "N/A"} EUR")
+                            appendLine("1 USD = ${tasas["GBP"] ?: "N/A"} GBP")
+                            appendLine("1 USD = ${tasas["BRL"] ?: "N/A"} BRL")
+                            append("1 USD = ${tasas["MXN"] ?: "N/A"} MXN")
+                        }
+                    }
+                    is ResultadoApi.Error -> {
+                        progressTasas.ocultar()
+                        tvTasas.text = resultado.mensaje
+                        tvTasas.setTextColor(requireContext().getColor(R.color.rojo_gasto))
+                    }
                 }
             }
-        }
 
-        // Botón para consultar tasas
-        binding.btnConsultarTasas.setOnClickListener {
-            viewModel.consultarTasas()
+            btnConsultarTasas.setOnClickListener {
+                viewModel.consultarTasas()
+            }
         }
     }
 
-    // Calcula y muestra las estadísticas por categoría
+    // Calcula y muestra las estadísticas usando técnicas avanzadas de Kotlin
     private fun mostrarEstadisticas(transacciones: List<Transaccion>) {
-        // Filtrar solo gastos (monto negativo)
-        val gastos = transacciones.filter { !it.esIngreso() }
+        // Top 3 categorías de gasto usando encadenamiento funcional
+        val porCategoria = transacciones
+            .filter { !it.esIngreso() }
+            .groupBy { it.categoria }
+            .mapValues { (_, lista) -> lista.sumOf { Math.abs(it.monto) } }
+            .toList()
+            .sortedByDescending { it.second }
 
-        // Agrupar por categoría y sumar los montos
-        // groupBy agrupa los elementos por una clave (la categoría)
-        // mapValues transforma los valores de cada grupo (suma los montos)
-        val porCategoria = gastos
-            .groupBy { it.categoria }  // Map<Categoria, List<Transaccion>>
-            .mapValues { (_, transacciones) ->
-                // Sumar los valores absolutos de los montos de cada grupo
-                transacciones.sumOf { Math.abs(it.monto) }
+        with(binding) {
+            // Mostrar las categorías con sus totales
+            tvDetalleCategorias.text = buildString {
+                porCategoria.forEach { (categoria, total) ->
+                    appendLine("${categoria.emoji} ${categoria.etiqueta}: ${total.formatearCOP()}")
+                }
             }
-            .toList()  // Convertir a lista de pares (Categoria, Double)
-            .sortedByDescending { it.second }  // Ordenar de mayor a menor gasto
 
-        // Mostrar las categorías con sus totales
-        // buildString construye un String de forma eficiente
-        val detalle = buildString {
-            for ((categoria, total) in porCategoria) {
-                appendLine("${categoria.emoji} ${categoria.etiqueta}: ${total.formatearCOP()}")
+            // Construir el texto del resumen usando buildString y operaciones funcionales
+            tvTotalTransacciones.text = "Total de transacciones: ${transacciones.size}"
+
+            // Calcular promedio de gastos usando let y takeIf para manejar lista vacía
+            transacciones
+                .filter { !it.esIngreso() }
+                .takeIf { it.isNotEmpty() }
+                ?.let { gastos ->
+                    val promedio = gastos.sumOf { Math.abs(it.monto) } / gastos.size
+                    tvPromedioGasto.text = "Promedio por gasto: ${promedio.formatearCOP()}"
+                    tvPromedioGasto.mostrar()
+                } ?: run {
+                tvPromedioGasto.ocultar()
+            }
+
+            // Información extra opcional usando técnicas avanzadas
+            val resumenExtra = buildString {
+                // Mayor ingreso
+                transacciones
+                    .filter { it.esIngreso() }
+                    .maxByOrNull { it.monto }
+                    ?.let { mayor ->
+                        appendLine("\nMayor ingreso: ${mayor.descripcion} (${mayor.montoFormateado()})")
+                    }
+
+                // Mayor gasto
+                transacciones
+                    .filter { !it.esIngreso() }
+                    .minByOrNull { it.monto }
+                    ?.let { mayor ->
+                        append("Mayor gasto: ${mayor.descripcion} (${mayor.montoFormateado()})")
+                    }
+            }
+
+            if (resumenExtra.isNotEmpty()) {
+                tvTotalTransacciones.append(resumenExtra)
             }
         }
-        binding.tvDetalleCategorias.text = detalle
-
-        // Mostrar resumen general
-        binding.tvTotalTransacciones.text = "Total de transacciones: ${transacciones.size}"
-
-        // Calcular promedio de gastos
-        val promedioGasto = if (gastos.isNotEmpty()) {
-            gastos.sumOf { Math.abs(it.monto) } / gastos.size
-        } else {
-            0.0
-        }
-        binding.tvPromedioGasto.text = "Promedio por gasto: ${promedioGasto.formatearCOP()}"
     }
 
     override fun onDestroyView() {

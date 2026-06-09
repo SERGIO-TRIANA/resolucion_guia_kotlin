@@ -48,28 +48,28 @@ class InicioFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Observar los datos del ViewModel compartido
-        // viewLifecycleOwner es el lifecycle del Fragment (no de la Activity)
-        // Usar viewLifecycleOwner en lugar de "this" para evitar memory leaks
-        viewModel.balance.observe(viewLifecycleOwner) { balance ->
-            binding.tvBalance.text = balance.formatearCOP()
-        }
+        // Usamos la scope function 'with' para simplificar el acceso a binding
+        with(binding) {
+            // Observar los datos del ViewModel compartido
+            viewModel.balance.observe(viewLifecycleOwner) { balance ->
+                tvBalance.text = balance.formatearCOP()
+            }
 
-        viewModel.ingresos.observe(viewLifecycleOwner) { ingresos ->
-            binding.tvIngresos.text = ingresos.formatearCOP()
-        }
+            viewModel.ingresos.observe(viewLifecycleOwner) { ingresos ->
+                tvIngresos.text = ingresos.formatearCOP()
+            }
 
-        viewModel.gastos.observe(viewLifecycleOwner) { gastos ->
-            binding.tvGastos.text = gastos.formatearCOP()
-        }
+            viewModel.gastos.observe(viewLifecycleOwner) { gastos ->
+                tvGastos.text = gastos.formatearCOP()
+            }
 
-        // Mostrar las últimas 5 transacciones
-        viewModel.transacciones.observe(viewLifecycleOwner) { lista ->
-            // take(5) obtiene solo los primeros 5 elementos
-            val ultimas = lista.take(5)
-            val adapter = TransaccionAdapter(ultimas) { /* click */ }
-            binding.rvUltimas.layoutManager = LinearLayoutManager(requireContext())
-            binding.rvUltimas.adapter = adapter
+            // Mostrar las últimas 5 transacciones usando operaciones funcionales
+            viewModel.transacciones.observe(viewLifecycleOwner) { lista ->
+                // take(5) obtiene solo los primeros 5 elementos de forma funcional
+                val adapter = TransaccionAdapter(lista.take(5)) { /* click */ }
+                rvUltimas.layoutManager = LinearLayoutManager(requireContext())
+                rvUltimas.adapter = adapter
+            }
         }
     }
 

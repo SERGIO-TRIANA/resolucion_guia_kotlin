@@ -78,22 +78,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // ===== OPERACIONES REMOTAS =====
 
-    // Consultar tasas de cambio
+    // Consultar tasas de cambio usando bloques try-catch simplificados con coroutines
     fun consultarTasas(monedaBase: String = "USD") {
-        _tasasCambio.value = ResultadoApi.Cargando
-
         viewModelScope.launch {
+            _tasasCambio.value = ResultadoApi.Cargando
             try {
-                val respuesta = withContext(Dispatchers.IO) {
-                    repository.obtenerTasasCambio(monedaBase)
-                }
+                // El cambio de hilo (Dispatchers.IO) ya ocurre dentro del repositorio
+                val respuesta = repository.obtenerTasasCambio(monedaBase)
                 _tasasCambio.value = ResultadoApi.Exito(respuesta)
-            } catch (e: UnknownHostException) {
-                _tasasCambio.value = ResultadoApi.Error("Sin conexión a internet")
-            } catch (e: SocketTimeoutException) {
-                _tasasCambio.value = ResultadoApi.Error("Tiempo de espera agotado")
             } catch (e: Exception) {
-                _tasasCambio.value = ResultadoApi.Error("Error: ${e.message}")
+                val mensaje = when (e) {
+                    is UnknownHostException -> "Sin conexión a internet"
+                    is SocketTimeoutException -> "Tiempo de espera agotado"
+                    else -> "Error inesperado: ${e.message}"
+                }
+                _tasasCambio.value = ResultadoApi.Error(mensaje)
             }
         }
     }

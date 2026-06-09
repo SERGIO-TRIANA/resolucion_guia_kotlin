@@ -6,6 +6,8 @@ package com.example.misfinanzas
 import androidx.lifecycle.LiveData
 import com.example.misfinanzas.api.RetrofitClient
 import com.example.misfinanzas.api.TasaCambioResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // El Repository recibe el DAO como dependencia (inyección de dependencias manual)
 // Así es fácil de testear: en tests se puede pasar un DAO falso
@@ -46,9 +48,8 @@ class TransaccionRepository(private val dao: TransaccionDao) {
     // ===== DATOS REMOTOS (API) =====
 
     // Consultar tasas de cambio desde la API
-    // suspend porque hace una llamada de red
-    // Retorna el resultado directamente (el ViewModel maneja los estados)
-    suspend fun obtenerTasasCambio(monedaBase: String = "USD"): TasaCambioResponse {
-        return RetrofitClient.apiService.obtenerTasas(monedaBase)
-    }
+    suspend fun obtenerTasasCambio(monedaBase: String = "USD"): TasaCambioResponse =
+        withContext(Dispatchers.IO) {
+            RetrofitClient.apiService.obtenerTasas(monedaBase)
+        }
 }
