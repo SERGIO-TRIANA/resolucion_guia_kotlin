@@ -52,15 +52,15 @@ class InicioFragment : Fragment() {
         // viewLifecycleOwner es el lifecycle del Fragment (no de la Activity)
         // Usar viewLifecycleOwner en lugar de "this" para evitar memory leaks
         viewModel.balance.observe(viewLifecycleOwner) { balance ->
-            binding.tvBalance.text = formatearMonto(balance)
+            binding.tvBalance.text = balance.formatearCOP()
         }
 
         viewModel.ingresos.observe(viewLifecycleOwner) { ingresos ->
-            binding.tvIngresos.text = formatearMonto(ingresos)
+            binding.tvIngresos.text = ingresos.formatearCOP()
         }
 
         viewModel.gastos.observe(viewLifecycleOwner) { gastos ->
-            binding.tvGastos.text = formatearMonto(gastos)
+            binding.tvGastos.text = gastos.formatearCOP()
         }
 
         // Mostrar las últimas 5 transacciones
@@ -79,9 +79,5 @@ class InicioFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null  // evitar memory leaks
-    }
-
-    private fun formatearMonto(monto: Double): String {
-        return "$ ${String.format("%,.0f", monto)}"
     }
 }

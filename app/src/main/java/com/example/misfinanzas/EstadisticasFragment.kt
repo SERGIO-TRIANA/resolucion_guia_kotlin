@@ -41,12 +41,12 @@ class EstadisticasFragment : Fragment() {
             when (resultado) {
                 is ResultadoApi.Cargando -> {
                     // Mostrar el indicador de carga
-                    binding.progressTasas.visibility = View.VISIBLE
+                    binding.progressTasas.mostrar()
                     binding.tvTasas.text = ""
                 }
                 is ResultadoApi.Exito -> {
                     // Ocultar el indicador de carga
-                    binding.progressTasas.visibility = View.GONE
+                    binding.progressTasas.ocultar()
                     // Mostrar las tasas relevantes
                     val tasas = resultado.datos.rates
                     val texto = buildString {
@@ -60,7 +60,7 @@ class EstadisticasFragment : Fragment() {
                     binding.tvTasas.text = texto
                 }
                 is ResultadoApi.Error -> {
-                    binding.progressTasas.visibility = View.GONE
+                    binding.progressTasas.ocultar()
                     binding.tvTasas.text = resultado.mensaje
                     binding.tvTasas.setTextColor(
                         requireContext().getColor(R.color.rojo_gasto)
@@ -96,7 +96,7 @@ class EstadisticasFragment : Fragment() {
         // buildString construye un String de forma eficiente
         val detalle = buildString {
             for ((categoria, total) in porCategoria) {
-                appendLine("${categoria.emoji} ${categoria.etiqueta}: ${formatearMonto(total)}")
+                appendLine("${categoria.emoji} ${categoria.etiqueta}: ${total.formatearCOP()}")
             }
         }
         binding.tvDetalleCategorias.text = detalle
@@ -110,11 +110,7 @@ class EstadisticasFragment : Fragment() {
         } else {
             0.0
         }
-        binding.tvPromedioGasto.text = "Promedio por gasto: ${formatearMonto(promedioGasto)}"
-    }
-
-    private fun formatearMonto(monto: Double): String {
-        return "$ ${String.format("%,.0f", monto)}"
+        binding.tvPromedioGasto.text = "Promedio por gasto: ${promedioGasto.formatearCOP()}"
     }
 
     override fun onDestroyView() {
